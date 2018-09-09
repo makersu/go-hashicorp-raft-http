@@ -44,12 +44,11 @@ type Command struct {
 
 // Node State Machine
 type NodeFSM struct {
-	// db *badger.DB
-	// rbt *rbt.Tree
-
 	mutex sync.Mutex
 
-	m map[string]string // The key-value store for the system.
+	// db *badger.DB
+	// rbt *rbt.Tree
+	fsmState map[string]string // The key-value store for the system.
 
 	logger *log.Logger
 }
@@ -57,18 +56,9 @@ type NodeFSM struct {
 func NewNodeFSM() *NodeFSM {
 
 	return &NodeFSM{
-		m:      make(map[string]string),
-		logger: log.New(os.Stderr, "[NodeFSM] ", log.LstdFlags),
+		fsmState: make(map[string]string),
+		logger:   log.New(os.Stderr, "[NodeFSM] ", log.LstdFlags),
 	}
-}
-
-// Get returns the value for the given key.
-func (fsm *NodeFSM) Get(key string) (string, error) {
-
-	fsm.mutex.Lock()
-	defer fsm.mutex.Unlock()
-
-	return fsm.m[key], nil //?
 }
 
 // Apply applies a Raft log entry to the key-value store.
@@ -84,7 +74,7 @@ func (fsm *NodeFSM) Apply(l *raft.Log) interface{} {
 	case "set":
 		return fsm.applySet(cmd.Key, cmd.Value)
 	// case "delete":
-	// return f.applyDelete(c.Key)
+	// return fsm.applyDelete(c.Key)
 	default:
 		panic(fmt.Sprintf("unrecognized command op: %s", cmd.Op))
 	}
@@ -96,8 +86,17 @@ func (fsm *NodeFSM) applySet(key, value string) interface{} {
 	fsm.mutex.Lock()
 	defer fsm.mutex.Unlock()
 
-	fsm.m[key] = value
+	fsm.fsmState[key] = value
 	return nil
+}
+
+// Get returns the value for the given key.
+func (fsm *NodeFSM) Get(key string) (string, error) {
+
+	fsm.mutex.Lock()
+	defer fsm.mutex.Unlock()
+
+	return fsm.fsmState[key], nil //?
 }
 
 // Snapshot returns a snapshot of the key-value store.
@@ -108,24 +107,24 @@ func (fsm *NodeFSM) Snapshot() (raft.FSMSnapshot, error) {
 	defer fsm.mutex.Unlock()
 
 	// Clone the map.
-	o := make(map[string]string)
-	for k, v := range fsm.m {
-		o[k] = v
+	store := make(map[string]string)
+	for k, v := range fsm.fsmState {
+		store[k] = v
 	}
-	return &fsmSnapshot{store: o}, nil
+	return &NodeFSMSnapshot{snapshotState: store}, nil
 }
 
 // Restore restores an FSM from a snapshot.
 func (fsm *NodeFSM) Restore(rc io.ReadCloser) error {
 	fsm.logger.Println("Restore()")
 
-	o := make(map[string]string)
-	if err := json.NewDecoder(rc).Decode(&o); err != nil {
+	store := make(map[string]string)
+	if err := json.NewDecoder(rc).Decode(&store); err != nil {
 		return err
 	}
 
 	// Set the state from the snapshot, no lock required according to
 	// Hashicorp docs.
-	fsm.m = o
+	fsm.fsmState = store
 	return nil
 }

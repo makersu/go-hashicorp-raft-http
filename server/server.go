@@ -210,6 +210,10 @@ func (node *ClusterNode) LeaveClusterNode(nodeID, addr string) error {
 
 }
 
+func (node *ClusterNode) RaftState() string {
+	return node.raft.State().String()
+}
+
 // SnapshotClusterNode handle ClusterNode snapshost mannually
 func (node *ClusterNode) SnapshotClusterNode() error {
 	node.Logger.Printf("SnapshotClusterNode() doing snapshot mannually")

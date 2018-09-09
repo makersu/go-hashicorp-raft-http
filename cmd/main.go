@@ -43,9 +43,9 @@ func init() {
 
 /**
 go build -o bin/go-hashicorp-raft-http cmd/*
-bin/go-hashicorp-raft-http -id matching1 -raftDir ./matching1 -raftAddr :7777  -httpAddr :8887
-bin/go-hashicorp-raft-http -id matching2 -raftDir ./matching2 -raftAddr :7778  -httpAddr :8888 -joinHttpAddr :8887
-bin/go-hashicorp-raft-http -id matching3 -raftDir ./matching3 -raftAddr :7779  -httpAddr :8889 -joinHttpAddr :8887
+bin/go-hashicorp-raft-http -id matching1 -raftDir ./snaphosts/matching1 -raftAddr :7777  -httpAddr :8887
+bin/go-hashicorp-raft-http -id matching2 -raftDir ./snaphosts/matching2 -raftAddr :7778  -httpAddr :8888 -joinHttpAddr :8887
+bin/go-hashicorp-raft-http -id matching3 -raftDir ./snaphosts/matching3 -raftAddr :7779  -httpAddr :8889 -joinHttpAddr :8887
 */
 func main() {
 	flag.Parse()

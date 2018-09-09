@@ -10,7 +10,7 @@ go build -o bin/go-hashicorp-raft-http cmd/*
 ```
 bin/go-hashicorp-raft-http -id matching1 -raftDir ./snapshots/matching1 -raftAddr :7777  -httpAddr :8887
 bin/go-hashicorp-raft-http -id matching2 -raftDir ./snapshots/matching2 -raftAddr :7778  -httpAddr :8888 -joinHttpAddr :8887
-go-hashicorp-raft-http -id matching3 -raftDir ./snapshots/matching3 -raftAddr :7779  -httpAddr :8889 -joinHttpAddr :8887
+bin/go-hashicorp-raft-http -id matching3 -raftDir ./snapshots/matching3 -raftAddr :7779  -httpAddr :8889 -joinHttpAddr :8887
 ```
 
 # testing
@@ -54,13 +54,24 @@ curl -XGET localhost:8887/key/x
 curl -XPOST localhost:8887/leave -d '{"id": "matching2","addr":":7778"}'
 ```
 
+## raft State
+```
+curl -XGET localhost:8887/raftstate
+```
+
 ## snapshot
 ```
 curl -XGET localhost:8887/snapshot
 ```
 
-## snapshot when kill process
+## test snapshot when kill process
 ```
 ps aux | grep go-hashicorp-raft-http
 kill 58443
 ```
+
+# Todo
+* zookeeper
+
+# Reference
+https://github.com/otoolep/hraftd

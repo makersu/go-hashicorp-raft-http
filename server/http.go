@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net"
 	"net/http"
@@ -56,6 +57,8 @@ func (handler *NodeHttpHandler) ServeHTTP(resp http.ResponseWriter, req *http.Re
 		handler.handleJoinClusterRequest(resp, req)
 	} else if req.URL.Path == "/leave" {
 		handler.handleLeaveClusterRequest(resp, req)
+	} else if req.URL.Path == "/raftstate" {
+		handler.handleRaftStateRequest(resp, req)
 	} else if req.URL.Path == "/snapshot" {
 		handler.handleSnapshotRequest(resp, req)
 	} else {
@@ -124,6 +127,17 @@ func (handler *NodeHttpHandler) handleLeaveClusterRequest(resp http.ResponseWrit
 		return
 	}
 }
+func (handler *NodeHttpHandler) handleRaftStateRequest(resp http.ResponseWriter, req *http.Request) {
+	s := handler.clusterNode.RaftState()
+	resp.Write([]byte(s))
+}
+
+func (handler *NodeHttpHandler) handleSnapshotRequest(resp http.ResponseWriter, req *http.Request) {
+	if err := handler.clusterNode.SnapshotClusterNode(); err != nil {
+		resp.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
 
 func (handler *NodeHttpHandler) handleKeyRequest(resp http.ResponseWriter, req *http.Request) {
 
@@ -166,6 +180,7 @@ func (handler *NodeHttpHandler) handleKeyRequest(resp http.ResponseWriter, req *
 		for k, v := range m {
 			if err := handler.clusterNode.Set(k, v); err != nil {
 				resp.WriteHeader(http.StatusInternalServerError)
+				fmt.Fprintf(resp, "%s", err) //?
 				return
 			}
 		}
@@ -176,11 +191,4 @@ func (handler *NodeHttpHandler) handleKeyRequest(resp http.ResponseWriter, req *
 		resp.WriteHeader(http.StatusMethodNotAllowed)
 	}
 	return
-}
-
-func (handler *NodeHttpHandler) handleSnapshotRequest(resp http.ResponseWriter, req *http.Request) {
-	if err := handler.clusterNode.SnapshotClusterNode(); err != nil {
-		resp.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 }

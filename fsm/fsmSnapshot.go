@@ -21,15 +21,15 @@ import (
 	"github.com/hashicorp/raft"
 )
 
-type fsmSnapshot struct {
-	store map[string]string
+type NodeFSMSnapshot struct {
+	snapshotState map[string]string
 }
 
-func (snapshot *fsmSnapshot) Persist(sink raft.SnapshotSink) error {
+func (snapshot *NodeFSMSnapshot) Persist(sink raft.SnapshotSink) error {
 	log.Println("Persist()") //
 	err := func() error {
 		// Encode data.
-		b, err := json.Marshal(snapshot.store)
+		b, err := json.Marshal(snapshot.snapshotState)
 		if err != nil {
 			return err
 		}
@@ -50,6 +50,6 @@ func (snapshot *fsmSnapshot) Persist(sink raft.SnapshotSink) error {
 	return err
 }
 
-func (snapshot *fsmSnapshot) Release() {
+func (snapshot *NodeFSMSnapshot) Release() {
 	log.Println("Release()") //
 }
