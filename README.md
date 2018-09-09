@@ -71,6 +71,7 @@ kill 58443
 ```
 
 # Todo
+* etcd
 * zookeeper
 
 # Reference
