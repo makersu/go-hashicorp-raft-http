@@ -76,3 +76,4 @@ kill 58443
 
 # Reference
 https://github.com/otoolep/hraftd
+https://github.com/hashicorp/raft
