@@ -75,5 +75,5 @@ kill 58443
 * zookeeper
 
 # Reference
-https://github.com/otoolep/hraftd
-https://github.com/hashicorp/raft
+* https://github.com/otoolep/hraftd
+* https://github.com/hashicorp/raft
